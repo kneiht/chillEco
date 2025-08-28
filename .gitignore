@@ -42,6 +42,7 @@ pnpm-debug.log*
 *.swp
 *.swo
 *~
+.zencoder/
 
 # OS generated files
 .DS_Store
