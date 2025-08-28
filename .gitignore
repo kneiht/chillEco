@@ -69,3 +69,22 @@ temp/
 *.bak
 *.backup
 *.tmp
+
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment (nếu có tạo thủ công)
+.venv/
+venv/
+
+# uv lockfile cache
+.uv/
+
+# Build artifacts
+*.egg-info/
+dist/
+build/

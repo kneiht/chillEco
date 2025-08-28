@@ -1,0 +1,98 @@
+version: '3'
+
+vars:
+  GATEWAY_PORT: 4000
+  USERS_PORT: 4001
+  POSTS_PORT: 4002
+  COMMENTS_PORT: 8000
+  FRONTEND_PORT: 5173
+
+tasks:
+  install:js:
+    desc: Install JS dependencies with pnpm
+    dir: .
+    cmds:
+      - pnpm install
+
+  install:py:
+    desc: Install Python dependencies with uv in comments service
+    dir: services/comments
+    cmds:
+      - uv sync
+
+  install:
+    desc: Install all dependencies (JS and Python)
+    deps: [install:js, install:py]
+
+  dev:users:
+    desc: Start users service in dev mode
+    dir: services/users
+    env:
+      PORT: '{{.USERS_PORT}}'
+    cmds:
+      - pnpm dev
+
+  dev:posts:
+    desc: Start posts service in dev mode
+    dir: services/posts
+    env:
+      PORT: '{{.POSTS_PORT}}'
+    cmds:
+      - pnpm dev
+
+  dev:gateway:
+    desc: Start gateway service in dev mode
+    dir: services/gateway
+    env:
+      PORT: '{{.GATEWAY_PORT}}'
+      USERS_URL: 'http://localhost:{{.USERS_PORT}}'
+      POSTS_URL: 'http://localhost:{{.POSTS_PORT}}'
+      COMMENTS_URL: 'http://localhost:{{.COMMENTS_PORT}}'
+    cmds:
+      - pnpm dev
+
+  dev:comments:
+    desc: Start comments service in dev mode (Python, uvicorn)
+    dir: services/comments
+    cmds:
+      - uv run uvicorn app.main:app --reload --host 0.0.0.0 --port {{.COMMENTS_PORT}}
+
+  dev:frontend:
+    desc: Start frontend service in dev mode
+    dir: services/frontend
+    env:
+      PORT: '{{.FRONTEND_PORT}}'
+      VITE_API_BASE_URL: 'http://localhost:{{.GATEWAY_PORT}}/api'
+    cmds:
+      - pnpm dev
+
+  dev:
+    desc: Run all services concurrently
+    cmds:
+      - >-
+        pnpm dlx concurrently \
+        "task dev:gateway" \
+        "task dev:users" \
+        "task dev:posts" \
+        "task dev:comments" \
+        "task dev:frontend"
+
+  build:
+    desc: Build all JS workspaces (and Python noop)
+    cmds:
+      - pnpm -r build || true
+
+  lint:
+    desc: Lint all JS workspaces
+    cmds:
+      - pnpm -r lint || true
+
+  format:
+    desc: Format all JS workspaces
+    cmds:
+      - pnpm -r format || true
+
+  clean:
+    desc: Remove build artifacts and node_modules from all workspaces
+    cmds:
+      - rm -rf **/node_modules **/dist **/.turbo || true
