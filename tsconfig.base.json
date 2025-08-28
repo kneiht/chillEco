@@ -1,0 +1,79 @@
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "useDefineForClassFields": true,
+
+    /* Modules */
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    /* Emit */
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "removeComments": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+
+    /* Interop Constraints */
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "checkJs": false,
+
+    /* Type Checking */
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "useUnknownInCatchVariables": true,
+
+    /* Completeness */
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+
+    /* Advanced */
+    "preserveWatchOutput": true,
+    "pretty": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+
+    /* Path Mapping for Monorepo */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["./shared/*"],
+      "@services/*": ["./services/*"],
+      "@frontend/*": ["./services/frontend/src/*"],
+      "@gateway/*": ["./services/gateway/src/*"],
+      "@posts/*": ["./services/posts/src/*"],
+      "@users/*": ["./services/users/src/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
+  ]
+}
