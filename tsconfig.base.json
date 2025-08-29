@@ -19,7 +19,6 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "removeComments": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -60,12 +59,7 @@
       "@users/*": ["./services/users/src/*"]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.js",
-    "**/*.jsx"
-  ],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
   "exclude": [
     "node_modules",
     "**/node_modules",

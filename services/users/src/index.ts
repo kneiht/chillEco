@@ -1,33 +1,24 @@
 import express from 'express';
 
-const app = express();
-app.use(express.json());
+export function createApp(): express.Application {
+  const app = express();
+  app.use(express.json());
 
-app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'users' }));
+  app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'users' }));
 
-app.get('/users', (_req, res) => {
-  res.json([
-    { id: 1, name: 'Ada Lovelace' },
-    { id: 2, name: 'Grace Hopper' },
-    { id: 3, name: 'Katherine Johnson' }
-  ]);
-});
+  return app;
+}
 
-app.get('/users/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const users = [
-    { id: 1, name: 'Ada Lovelace', email: 'ada@example.com' },
-    { id: 2, name: 'Grace Hopper', email: 'grace@example.com' },
-    { id: 3, name: 'Katherine Johnson', email: 'katherine@example.com' }
-  ];
-  
-  const user = users.find(u => u.id === id);
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+export function startServer(app: express.Application, port: number) {
+  return app.listen(port, () => console.log(`users service listening on http://localhost:${port}`));
+}
+
+// Only start the server if this file is run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  if (!process.env.PORT) {
+    throw new Error('USERS_PORT must be defined');
   }
-  
-  res.json(user);
-});
-
-const port = process.env.PORT ? Number(process.env.PORT) : 4001;
-app.listen(port, () => console.log(`users service listening on :${port}`));
+  const port = Number(process.env.PORT);
+  const app = createApp();
+  startServer(app, port);
+}

@@ -96,3 +96,37 @@ tasks:
     desc: Remove build artifacts and node_modules from all workspaces
     cmds:
       - rm -rf **/node_modules **/dist **/.turbo || true
+
+  test:users:
+    dir: services/users
+    cmds:
+      - pnpm test
+
+  test:posts:
+    dir: services/posts
+    cmds:
+      - pnpm test
+
+  test:gateway:
+    dir: services/gateway
+    cmds:
+      - pnpm test
+
+  test:frontend:
+    dir: services/frontend
+    cmds:
+      - pnpm test
+
+  test:comments:
+    dir: services/comments
+    cmds:
+      - uv run pytest
+
+  test:
+    desc: Run all tests
+    cmds:
+      - task test:users
+      - task test:posts
+      - task test:gateway
+      - task test:frontend
+      - task test:comments
