@@ -1,9 +1,8 @@
 import { createApp } from './app';
+import { env } from './config/environment';
 
-if (!process.env.PORT) {
-  throw new Error('USERS_PORT must be defined');
-}
-const PORT = Number(process.env.PORT);
+const PORT = env.PORT;
+
 const app = createApp();
 
 // Start server

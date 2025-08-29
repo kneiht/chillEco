@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import type { SuccessResponse, ErrorResponse } from '@shared/types/api';
+import type { SuccessResponse, ErrorResponse } from '../types/api';
 
 export function success<T>(res: Response, data: T, message = 'Success', status = 200) {
   const response: SuccessResponse = {

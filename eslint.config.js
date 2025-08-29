@@ -21,7 +21,7 @@ export default [
       '**/*.config.js',
       '**/*.config.ts',
       '**/public/**',
-      '**/.tsbuildinfo'
+      '**/.tsbuildinfo',
     ],
   },
 
@@ -36,7 +36,8 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
-        project: './tsconfig.base.json',
+        // Let @typescript-eslint infer the nearest tsconfig.json per package
+        projectService: true,
       },
       globals: {
         console: 'readonly',
@@ -71,7 +72,6 @@ export default [
         },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/prefer-const': 'error',
       '@typescript-eslint/no-inferrable-types': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',

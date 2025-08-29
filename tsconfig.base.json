@@ -51,7 +51,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@shared/*": ["./shared/*"],
+      "@libs/*": ["./libs/*"],
       "@services/*": ["./services/*"],
       "@frontend/*": ["./services/frontend/src/*"],
       "@gateway/*": ["./services/gateway/src/*"],

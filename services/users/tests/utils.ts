@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 import { Application } from 'express';
-import { createApp } from '../src/index';
+import { createApp } from '../src/app';
 
 export interface TestResponse {
   status: number;

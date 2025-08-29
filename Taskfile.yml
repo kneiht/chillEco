@@ -66,6 +66,12 @@ tasks:
     cmds:
       - pnpm dev
 
+  lint:users:
+    desc: Lint users service
+    dir: services/users
+    cmds:
+      - pnpm lint
+
   dev:
     desc: Run all services concurrently
     cmds:

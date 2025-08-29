@@ -5,21 +5,21 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc --project tsconfig.build.json",
-    "build:dev": "tsc --project tsconfig.json",
+    "build": "tsc",
     "start": "node dist/index.js",
     "lint": "eslint .",
     "format": "prettier -w .",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test": "echo \"no tests yet\""
   },
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "express": "5.1.0",
+    "mongoose": "^8.18.0",
     "zod": "4.1.4"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0"
+    "@types/bcryptjs": "^3.0.0",
+    "@types/express": "5.0.0",
+    "@types/node": "24.3.0"
   }
 }

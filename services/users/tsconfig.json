@@ -13,6 +13,6 @@
     "skipLibCheck": true,
     "types": ["vitest/globals", "node"]
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*", "tests/**/*", "../../libs/common/utils/response.ts"],
   "exclude": ["node_modules", "dist"]
 }
