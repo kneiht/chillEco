@@ -1,3 +1,7 @@
+# Private
+.ref/
+
+
 # Dependencies
 node_modules/
 pnpm-debug.log*

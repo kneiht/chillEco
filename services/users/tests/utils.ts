@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
-import { Express } from 'express';
+import { Application } from 'express';
+import { createApp } from '../src/index';
 
 export interface TestResponse {
   status: number;
@@ -7,8 +8,7 @@ export interface TestResponse {
   headers: Record<string, string>;
 }
 
-export function createTestApp(): Express {
-  const { createApp } = require('../src/index.js');
+export function createTestApp(): Application {
   return createApp();
 }
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
-import { createApp } from '../src/index.js';
+import { createApp } from '../src/app';
 
 describe('Users Service', () => {
   let app: ReturnType<typeof createApp>;
@@ -11,7 +11,7 @@ describe('Users Service', () => {
 
   describe('Health Endpoint', () => {
     it('should return 200 OK with correct service info', async () => {
-      const response = await request(app).get('/health').expect(200);
+      const response = await request(app).get('/api/health').expect(200);
 
       expect(response.body).toEqual({
         status: 'ok',
@@ -20,7 +20,7 @@ describe('Users Service', () => {
     });
 
     it('should have correct content type', async () => {
-      const response = await request(app).get('/health').expect('Content-Type', /json/);
+      const response = await request(app).get('/api/health').expect('Content-Type', /json/);
 
       expect(response.status).toBe(200);
     });
