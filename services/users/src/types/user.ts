@@ -28,9 +28,9 @@ export interface MongoUser {
 export interface UserRegistrationData {
   email: string;
   password: string;
-  username?: string;
-  firstName?: string;
-  lastName?: string;
+  username?: string | undefined;
+  firstName?: string | undefined;
+  lastName?: string | undefined;
 }
 
 // User login data (include password)

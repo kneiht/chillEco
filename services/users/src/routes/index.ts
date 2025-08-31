@@ -3,11 +3,15 @@ import { success, error } from '../utils/response';
 import authRoutes from './auth.routes';
 import testRoutes from './test.routes';
 import { getDbConnectionStatus } from '../config/database';
+import { isDevelopment } from '../config/environment';
 
 const router: express.Router = Router();
 
 router.use('/auth', authRoutes);
-router.use('/test', testRoutes);
+
+if (isDevelopment) {
+  router.use('/test', testRoutes);
+}
 
 // Welcome route
 router.get('/', (req, res) => {
