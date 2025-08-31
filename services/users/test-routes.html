@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Users Service Route Tester</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .endpoint-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .endpoint-card h3 {
+        margin-top: 0;
+        color: #333;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+      }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 10px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .response {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .response.success {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+      .response.error {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+      .response.info {
+        background-color: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        grid-column: 1 / -1;
+      }
+      .config {
+        grid-column: 1 / -1;
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+      .config h3 {
+        margin-top: 0;
+        color: #333;
+      }
+      .config-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Users Service Route Tester</h1>
+      <p>Test your users service endpoints both directly and through the gateway</p>
+    </div>
+
+    <div class="config">
+      <h3>Configuration</h3>
+      <div class="config-grid">
+        <div class="form-group">
+          <label for="directUrl">Direct Users Service URL:</label>
+          <input type="text" id="directUrl" value="http://localhost:4001" />
+        </div>
+        <div class="form-group">
+          <label for="gatewayUrl">Gateway URL (with /api/users prefix):</label>
+          <input type="text" id="gatewayUrl" value="http://localhost:4000/api/users" />
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Health Check -->
+      <div class="endpoint-card">
+        <h3>🏥 Health Check</h3>
+        <p><strong>GET</strong> /health</p>
+        <div class="form-group">
+          <label for="healthTarget">Target:</label>
+          <select id="healthTarget">
+            <option value="direct">Direct Service</option>
+            <option value="gateway">Through Gateway</option>
+          </select>
+        </div>
+        <button onclick="testHealth()">Test Health Check</button>
+        <div id="healthResponse" class="response" style="display: none"></div>
+      </div>
+
+      <!-- Register -->
+      <div class="endpoint-card">
+        <h3>👤 Register</h3>
+        <p><strong>POST</strong> /auth/register</p>
+        <div class="form-group">
+          <label for="registerTarget">Target:</label>
+          <select id="registerTarget">
+            <option value="direct">Direct Service</option>
+            <option value="gateway">Through Gateway</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">Email:</label>
+          <input
+            type="email"
+            id="registerEmail"
+            placeholder="user@example.com"
+            value="test@example.com"
+          />
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Password:</label>
+          <input type="password" id="registerPassword" placeholder="password" value="password123" />
+        </div>
+        <div class="form-group">
+          <label for="registerName">Name:</label>
+          <input type="text" id="registerName" placeholder="Full Name" value="Test User" />
+        </div>
+        <button onclick="testRegister()">Register</button>
+        <div id="registerResponse" class="response" style="display: none"></div>
+      </div>
+
+      <!-- Login -->
+      <div class="endpoint-card">
+        <h3>🔐 Login</h3>
+        <p><strong>POST</strong> /auth/login</p>
+        <div class="form-group">
+          <label for="loginTarget">Target:</label>
+          <select id="loginTarget">
+            <option value="direct">Direct Service</option>
+            <option value="gateway">Through Gateway</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="loginEmail">Email:</label>
+          <input
+            type="email"
+            id="loginEmail"
+            placeholder="user@example.com"
+            value="test@example.com"
+          />
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password:</label>
+          <input type="password" id="loginPassword" placeholder="password" value="password123" />
+        </div>
+        <button onclick="testLogin()">Login</button>
+        <div id="loginResponse" class="response" style="display: none"></div>
+      </div>
+
+      <!-- Logout -->
+      <div class="endpoint-card">
+        <h3>🚪 Logout</h3>
+        <p><strong>POST</strong> /auth/logout</p>
+        <div class="form-group">
+          <label for="logoutTarget">Target:</label>
+          <select id="logoutTarget">
+            <option value="direct">Direct Service</option>
+            <option value="gateway">Through Gateway</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="authToken">Authorization Token (if needed):</label>
+          <input type="text" id="authToken" placeholder="Bearer token or session cookie" />
+        </div>
+        <button onclick="testLogout()">Logout</button>
+        <div id="logoutResponse" class="response" style="display: none"></div>
+      </div>
+
+      <!-- Custom Request -->
+      <div class="endpoint-card">
+        <h3>🔧 Custom Request</h3>
+        <p>Test any endpoint with custom parameters</p>
+        <div class="form-group">
+          <label for="customTarget">Target:</label>
+          <select id="customTarget">
+            <option value="direct">Direct Service</option>
+            <option value="gateway">Through Gateway</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="customMethod">Method:</label>
+          <select id="customMethod">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="customPath">Path (e.g., /health, /auth/login):</label>
+          <input type="text" id="customPath" placeholder="/health" value="/health" />
+        </div>
+        <div class="form-group">
+          <label for="customHeaders">Headers (JSON):</label>
+          <textarea id="customHeaders" rows="3" placeholder='{"Content-Type": "application/json"}'>
+{}</textarea
+          >
+        </div>
+        <div class="form-group">
+          <label for="customBody">Request Body (JSON):</label>
+          <textarea id="customBody" rows="4" placeholder='{"key": "value"}'></textarea>
+        </div>
+        <button onclick="testCustom()">Send Request</button>
+        <div id="customResponse" class="response" style="display: none"></div>
+      </div>
+    </div>
+
+    <script>
+      function getBaseUrl(target) {
+        if (target === 'direct') {
+          return document.getElementById('directUrl').value;
+        } else {
+          return document.getElementById('gatewayUrl').value;
+        }
+      }
+
+      function showResponse(elementId, response, status, isSuccess) {
+        const element = document.getElementById(elementId);
+        element.style.display = 'block';
+        element.className = `response ${isSuccess ? 'success' : 'error'}`;
+        element.textContent = `Status: ${status}\n\n${response}`;
+      }
+
+      function showInfo(elementId, message) {
+        const element = document.getElementById(elementId);
+        element.style.display = 'block';
+        element.className = 'response info';
+        element.textContent = message;
+      }
+
+      async function makeRequest(url, options = {}) {
+        try {
+          showInfo(options.responseElementId, `Making request to: ${url}`);
+
+          const response = await fetch(url, {
+            mode: 'cors',
+            ...options,
+          });
+
+          const responseText = await response.text();
+          let parsedResponse;
+
+          try {
+            parsedResponse = JSON.parse(responseText);
+            parsedResponse = JSON.stringify(parsedResponse, null, 2);
+          } catch (e) {
+            parsedResponse = responseText;
+          }
+
+          showResponse(options.responseElementId, parsedResponse, response.status, response.ok);
+        } catch (error) {
+          showResponse(
+            options.responseElementId,
+            `Error: ${error.message}`,
+            'Network Error',
+            false
+          );
+        }
+      }
+
+      async function testHealth() {
+        const target = document.getElementById('healthTarget').value;
+        const baseUrl = getBaseUrl(target);
+        const url = `${baseUrl}/health`;
+
+        await makeRequest(url, {
+          method: 'GET',
+          responseElementId: 'healthResponse',
+        });
+      }
+
+      async function testRegister() {
+        const target = document.getElementById('registerTarget').value;
+        const baseUrl = getBaseUrl(target);
+        const url = `${baseUrl}/auth/register`;
+
+        const body = {
+          email: document.getElementById('registerEmail').value,
+          password: document.getElementById('registerPassword').value,
+          name: document.getElementById('registerName').value,
+        };
+
+        await makeRequest(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+          responseElementId: 'registerResponse',
+        });
+      }
+
+      async function testLogin() {
+        const target = document.getElementById('loginTarget').value;
+        const baseUrl = getBaseUrl(target);
+        const url = `${baseUrl}/auth/login`;
+
+        const body = {
+          email: document.getElementById('loginEmail').value,
+          password: document.getElementById('loginPassword').value,
+        };
+
+        await makeRequest(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+          responseElementId: 'loginResponse',
+        });
+      }
+
+      async function testLogout() {
+        const target = document.getElementById('logoutTarget').value;
+        const baseUrl = getBaseUrl(target);
+        const url = `${baseUrl}/auth/logout`;
+
+        const headers = {
+          'Content-Type': 'application/json',
+        };
+
+        const token = document.getElementById('authToken').value;
+        if (token) {
+          headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        }
+
+        await makeRequest(url, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({}),
+          responseElementId: 'logoutResponse',
+        });
+      }
+
+      async function testCustom() {
+        const target = document.getElementById('customTarget').value;
+        const baseUrl = getBaseUrl(target);
+        const path = document.getElementById('customPath').value;
+        const url = `${baseUrl}${path}`;
+
+        const method = document.getElementById('customMethod').value;
+        const headersText = document.getElementById('customHeaders').value.trim();
+        const bodyText = document.getElementById('customBody').value.trim();
+
+        let headers = {};
+        if (headersText) {
+          try {
+            headers = JSON.parse(headersText);
+          } catch (e) {
+            showResponse(
+              'customResponse',
+              `Invalid headers JSON: ${e.message}`,
+              'Parse Error',
+              false
+            );
+            return;
+          }
+        }
+
+        const options = {
+          method: method,
+          headers: headers,
+          responseElementId: 'customResponse',
+        };
+
+        if (bodyText && (method === 'POST' || method === 'PUT')) {
+          try {
+            JSON.parse(bodyText); // Validate JSON
+            options.body = bodyText;
+          } catch (e) {
+            showResponse('customResponse', `Invalid body JSON: ${e.message}`, 'Parse Error', false);
+            return;
+          }
+        }
+
+        await makeRequest(url, options);
+      }
+
+      // Auto-fill custom headers with JSON content-type for POST/PUT
+      document.getElementById('customMethod').addEventListener('change', function () {
+        const method = this.value;
+        const headersField = document.getElementById('customHeaders');
+
+        if ((method === 'POST' || method === 'PUT') && headersField.value.trim() === '{}') {
+          headersField.value = '{"Content-Type": "application/json"}';
+        }
+      });
+    </script>
+  </body>
+</html>

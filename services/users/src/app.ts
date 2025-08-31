@@ -1,21 +1,27 @@
 import express from 'express';
+import cors from 'cors';
 import routes from './routes';
-import { connectDb } from './config/database';
-import { logger } from './middleware/logger';
+import { requestLogger, errorLogger } from './middleware/logger';
 import { isAuthenticated } from './middleware/auth';
-
-// Connect to database
-connectDb().catch(error => console.dir(error));
+import { errorHandler } from './middleware/error-handler';
 
 // Create express app
 export function createApp(): express.Application {
   const app = express();
 
-  app.use(logger);
+  // Middleware
+  app.use(requestLogger);
+  app.use(cors());
   app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
   app.use(isAuthenticated);
 
   // Routes
   app.use('/api', routes);
+
+  // Error handling
+  app.use(errorLogger);
+  app.use(errorHandler);
+
   return app;
 }

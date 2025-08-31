@@ -1,3 +1,4 @@
+// Common API response interface
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
@@ -7,6 +8,7 @@ export interface ApiResponse<T = unknown> {
   code?: number;
 }
 
+// Successful API response interface
 export interface SuccessResponse<T = unknown> extends ApiResponse<T> {
   success: true;
   data: T;
@@ -14,6 +16,7 @@ export interface SuccessResponse<T = unknown> extends ApiResponse<T> {
   errors?: never;
 }
 
+// Errored API response interface
 export interface ErrorResponse extends ApiResponse {
   success: false;
   data?: never;
@@ -21,11 +24,21 @@ export interface ErrorResponse extends ApiResponse {
   errors?: Record<string, string | string[]>;
 }
 
+// Paginated API response interface
 export interface PaginatedResponse<T = unknown> extends SuccessResponse<T> {
   pagination?: {
     page: number;
     limit: number;
     total: number;
     pages: number;
+  };
+}
+
+// Request with user type (for authentication requests)
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    username?: string;
   };
 }

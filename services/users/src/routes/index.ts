@@ -1,20 +1,37 @@
 import express, { Router } from 'express';
 import { success, error } from '../utils/response';
-import mongoose from 'mongoose';
 import authRoutes from './auth.routes';
+import testRoutes from './test.routes';
+import { getDbConnectionStatus } from '../config/database';
 
 const router: express.Router = Router();
 
 router.use('/auth', authRoutes);
+router.use('/test', testRoutes);
+
+// Welcome route
+router.get('/', (req, res) => {
+  success(res, {
+    message: 'Welcome to the Users service!',
+    environment: process.env.NODE_ENV,
+    // TODO: add more info like available endpoints, version, etc.
+  });
+});
 
 // Health check
 router.get('/health', (_req, res) => {
   success(res, {
     status: 'ok',
     service: 'users',
-    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    environment: process.env.NODE_ENV,
+    database: getDbConnectionStatus(),
     timestamp: new Date().toISOString(),
   });
+});
+
+// Test error
+router.get('/error', (_req, _res) => {
+  throw new Error('Test error');
 });
 
 // 404 handler
