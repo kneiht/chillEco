@@ -2,7 +2,7 @@ import { beforeAll, afterAll } from 'vitest';
 
 // Set test environment variables
 process.env.NODE_ENV = 'test';
-process.env.PORT = '3001';
+process.env.PORT = '4001';
 
 // Global test setup
 beforeAll(() => {

@@ -14,12 +14,12 @@ if (missingVars.length > 0) {
 
 // Environment configuration object
 export const env = {
-  NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: process.env.PORT || '3001',
-  DATABASE_URL: process.env.DATABASE_URL || '',
-  JWT_SECRET: process.env.JWT_SECRET || '',
-  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
-  BCRYPT_ROUNDS: process.env.BCRYPT_ROUNDS || '12',
+  NODE_ENV: process.env.NODE_ENV?.toString() || 'development',
+  PORT: process.env.PORT?.toString() || '4001',
+  DATABASE_URL: process.env.DATABASE_URL?.toString() || '',
+  JWT_SECRET: process.env.JWT_SECRET?.toString() || '',
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN?.toString() || '7d',
+  BCRYPT_ROUNDS: process.env.BCRYPT_ROUNDS?.toString() || '12',
 };
 
 // Environment type checking

@@ -1,8 +1,16 @@
 import express, { Router } from 'express';
-import { success, error, created, serverError } from '../utils/response';
+import { success, error, created, serverError, unauthorized } from '../utils/response';
 import { validateRegistration, validateLogin } from '../middleware/validation.middleware';
-import { createUser, authenticateUser, findUserByEmail } from '../services/user.service';
+import { findUserByEmail, updateUserProfile } from '../services/user.service';
 import type { RegisterInput, LoginInput } from '../validators/auth.validator';
+import { authenticateToken, optionalAuth } from '../middleware/auth';
+import { AuthenticatedRequest } from '../types/api';
+import {
+  registerUserWithTokens,
+  loginUserWithTokens,
+  refreshAccessToken,
+  verifyUserToken,
+} from '../services/auth.service';
 
 const router: express.Router = Router();
 
@@ -15,13 +23,14 @@ router.post('/register', validateRegistration, async (req, res) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword, ...userData } = registerData;
 
-    // Create user
-    const newUser = await createUser(userData);
+    // Create user and generate tokens
+    const { user, tokens } = await registerUserWithTokens(userData);
 
-    created(
+    return created(
       res,
       {
-        user: newUser,
+        user,
+        ...tokens,
         message: 'Registration successful! Please verify your email to activate your account.',
       },
       'User registered successfully'
@@ -31,10 +40,10 @@ router.post('/register', validateRegistration, async (req, res) => {
 
     // Handle specific errors
     if (message.includes('already exists')) {
-      error(res, message, 409); // Conflict
+      return error(res, message, 409); // Conflict
     }
 
-    error(res, message, 400);
+    return error(res, message, 400);
   }
 });
 
@@ -43,19 +52,20 @@ router.post('/login', validateLogin, async (req, res) => {
   try {
     const loginData: LoginInput = req.body;
 
-    // Authenticate user
-    const user = await authenticateUser(loginData);
+    // Authenticate user and get tokens
+    const result = await loginUserWithTokens(loginData);
 
-    if (!user) {
-      error(res, 'Invalid email or password', 401);
+    if (!result) {
+      return unauthorized(res, 'Invalid email or password');
     }
 
-    // TODO: Generate JWT token (will implement in next checkpoint)
-    success(
+    const { user, tokens } = result;
+
+    return success(
       res,
       {
         user,
-        token: 'jwt_token_placeholder',
+        ...tokens,
         message: 'Login successful!',
       },
       'User logged in successfully'
@@ -64,23 +74,133 @@ router.post('/login', validateLogin, async (req, res) => {
     const message = err instanceof Error ? err.message : 'Login failed';
 
     if (message.includes('deactivated')) {
-      error(res, 'Account is deactivated. Please contact support.', 403);
+      return error(res, 'Account is deactivated. Please contact support.', 403);
     }
 
-    error(res, message, 401);
+    return unauthorized(res, message);
   }
 });
 
-// Logout endpoint
-router.post('/logout', (req, res) => {
-  // TODO: Implement token blacklisting (will implement with JWT)
+// Refresh token endpoint
+router.post('/refresh', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return error(res, 'Refresh token is required', 400);
+    }
+
+    // Refresh tokens
+    const result = await refreshAccessToken(refreshToken);
+
+    if (!result) {
+      return unauthorized(res, 'Invalid or expired refresh token');
+    }
+
+    const { user, tokens } = result;
+
+    return success(
+      res,
+      {
+        user,
+        ...tokens,
+        message: 'Tokens refreshed successfully',
+      },
+      'Tokens refreshed successfully'
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Token refresh failed';
+    return unauthorized(res, message);
+  }
+});
+
+// Verify token endpoint
+router.post('/verify', async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return error(res, 'Token is required', 400);
+    }
+
+    const user = await verifyUserToken(token);
+
+    if (!user) {
+      return unauthorized(res, 'Invalid or expired token');
+    }
+
+    return success(
+      res,
+      {
+        valid: true,
+        user,
+        message: 'Token is valid',
+      },
+      'Token verification successful'
+    );
+  } catch (_err) {
+    return unauthorized(res, 'Token verification failed');
+  }
+});
+
+// Logout endpoint (client-side token removal)
+router.post('/logout', optionalAuth, (req, res) => {
+  // TODO: Implement token blacklisting for logout in production environments.
+  // Currently, logout is handled by client-side token removal only.
   success(
     res,
     {
-      message: 'Successfully logged out',
+      message: 'Successfully logged out. Please remove tokens from client storage.',
+      user: (req as AuthenticatedRequest).user || null,
     },
     'Logout successful'
   );
+});
+
+// Get current user profile (protected route)
+router.get('/profile', authenticateToken, async (req, res) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+
+    if (!authReq.user) {
+      return unauthorized(res, 'User not authenticated');
+    }
+
+    return success(res, authReq.user, 'Profile retrieved successfully');
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to get profile';
+    return serverError(res, message);
+  }
+});
+
+// Update user profile (protected route)
+router.put('/profile', authenticateToken, async (req, res) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+
+    if (!authReq.user) {
+      return unauthorized(res, 'User not authenticated');
+    }
+
+    const updateData = req.body;
+
+    // Update user profile
+    const updatedUser = await updateUserProfile(authReq.user.id, updateData);
+
+    if (!updatedUser) {
+      return error(res, 'Failed to update profile', 400);
+    }
+
+    return success(res, updatedUser, 'Profile updated successfully');
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to update profile';
+
+    if (message.includes('already taken')) {
+      return error(res, message, 409);
+    }
+
+    return error(res, message, 400);
+  }
 });
 
 // Check email availability
@@ -90,12 +210,12 @@ router.get('/check-email/:email', async (req, res) => {
 
     // Basic email format validation
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      error(res, 'Invalid email format', 400);
+      return error(res, 'Invalid email format', 400);
     }
 
     const existingUser = await findUserByEmail(email);
 
-    success(
+    return success(
       res,
       {
         email,
@@ -106,13 +226,13 @@ router.get('/check-email/:email', async (req, res) => {
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to check email availability';
-    serverError(res, message);
+    return serverError(res, message);
   }
 });
 
 // Password reset request (placeholder)
 router.post('/forgot-password', (req, res) => {
-  // TODO: Implement password reset logic
+  // TODO: Implement password reset logic with email
   success(
     res,
     {
@@ -120,17 +240,6 @@ router.post('/forgot-password', (req, res) => {
     },
     'Password reset request received'
   );
-});
-
-// Profile routes (will be protected with JWT later)
-router.get('/profile', (req, res) => {
-  // TODO: Implement with JWT authentication
-  error(res, 'Authentication required', 401);
-});
-
-router.put('/profile', (req, res) => {
-  // TODO: Implement with JWT authentication
-  error(res, 'Authentication required', 401);
 });
 
 export default router;

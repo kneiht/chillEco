@@ -34,6 +34,8 @@ export interface PaginatedResponse<T = unknown> extends SuccessResponse<T> {
   };
 }
 
+import type { Request } from 'express';
+
 // Request with user type (for authentication requests)
 export interface AuthenticatedRequest extends Request {
   user?: {

@@ -1,12 +1,7 @@
 import bcrypt from 'bcryptjs';
 import UserModel from '../models/user.model.js';
 import { env } from '../config/environment.js';
-import type {
-  User,
-  UserRegistrationData,
-  UserLoginData,
-  UserProfileUpdateData,
-} from '../types/user.js';
+import type { User, UserRegistrationData, UserLoginData, UserUpdateData } from '../types/user.js';
 
 // Hash password utility
 async function hashPassword(password: string): Promise<string> {
@@ -120,7 +115,7 @@ export async function authenticateUser(loginData: UserLoginData): Promise<User |
 // Update user profile
 export async function updateUserProfile(
   userId: string,
-  updateData: UserProfileUpdateData
+  updateData: UserUpdateData
 ): Promise<User | null> {
   try {
     // Check username availability if updating

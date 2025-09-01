@@ -40,7 +40,7 @@ export interface UserLoginData {
 }
 
 // JWT payload
-export interface JwtPayLoad {
+export interface JwtPayload {
   userId: string;
   email: string;
   username?: string;
@@ -53,8 +53,23 @@ export interface AuthTokens {
 }
 
 // User profile update data
-export interface UserProfileUpdateData {
+export interface UserUpdateData {
   firstName?: string;
   lastName?: string;
   username?: string;
+}
+
+// Auth response
+export interface AuthResponse {
+  user: User;
+  accessToken: string;
+  refreshToken?: string;
+  message: string;
+}
+
+// Token verification response
+export interface TokenVerificationResponse {
+  valid: boolean;
+  user?: User;
+  message: string;
 }

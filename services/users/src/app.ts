@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import routes from './routes';
 import { requestLogger, errorLogger } from './middleware/logger';
-import { isAuthenticated } from './middleware/auth';
 import { errorHandler } from './middleware/error-handler';
 
 // Create express app
@@ -14,7 +13,6 @@ export function createApp(): express.Application {
   app.use(cors());
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-  app.use(isAuthenticated);
 
   // Routes
   app.use('/api', routes);

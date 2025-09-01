@@ -3,446 +3,935 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Users Service Route Tester</title>
+    <title>Users Service - Route Testing</title>
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: Arial, sans-serif;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 20px;
-        background-color: #f5f5f5;
-      }
-      .container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-      }
-      .endpoint-card {
         background: white;
-        border-radius: 8px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(45deg, #2196f3, #21cbf3);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .auth-status {
+        background: #f8f9fa;
+        padding: 15px 30px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .auth-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+      }
+
+      .status-authenticated {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .status-unauthenticated {
+        background: #f8d7da;
+        color: #721c24;
+      }
+
+      .btn-logout {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .btn-logout:hover {
+        background: #c82333;
+      }
+
+      .main-content {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 0;
+      }
+
+      .routes-section {
+        padding: 30px;
+        overflow-y: auto;
+        max-height: 80vh;
+      }
+
+      .response-section {
+        background: #f8f9fa;
+        padding: 30px;
+        border-left: 1px solid #dee2e6;
+        overflow-y: auto;
+        max-height: 80vh;
+      }
+
+      .route-group {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        overflow: hidden;
+      }
+
+      .route-group h2 {
+        background: #495057;
+        color: white;
+        padding: 15px 20px;
+        margin: 0;
+        font-size: 1.3rem;
+      }
+
+      .route-item {
+        border-bottom: 1px solid #dee2e6;
         padding: 20px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
-      .endpoint-card h3 {
-        margin-top: 0;
-        color: #333;
-        border-bottom: 2px solid #007bff;
-        padding-bottom: 10px;
+
+      .route-item:last-child {
+        border-bottom: none;
       }
+
+      .route-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+      }
+
+      .method {
+        padding: 5px 12px;
+        border-radius: 5px;
+        color: white;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+
+      .method-get {
+        background: #28a745;
+      }
+      .method-post {
+        background: #007bff;
+      }
+      .method-put {
+        background: #ffc107;
+        color: #212529;
+      }
+      .method-delete {
+        background: #dc3545;
+      }
+
+      .endpoint {
+        font-family: 'Courier New', monospace;
+        background: #f8f9fa;
+        padding: 5px 10px;
+        border-radius: 3px;
+        margin-left: 10px;
+      }
+
+      .route-description {
+        color: #6c757d;
+        margin-bottom: 15px;
+        font-style: italic;
+      }
+
       .form-group {
         margin-bottom: 15px;
       }
-      label {
+
+      .form-group label {
         display: block;
         margin-bottom: 5px;
-        font-weight: bold;
-        color: #555;
+        font-weight: 600;
+        color: #495057;
       }
-      input,
-      textarea,
-      select {
+
+      .form-control {
         width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition:
+          border-color 0.3s,
+          box-shadow 0.3s;
       }
-      button {
-        background-color: #007bff;
+
+      .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        outline: 0;
+      }
+
+      .btn {
+        background: #007bff;
         color: white;
         border: none;
         padding: 10px 20px;
-        border-radius: 4px;
+        border-radius: 5px;
         cursor: pointer;
-        font-size: 14px;
-        margin-right: 10px;
+        font-size: 1rem;
+        transition: all 0.3s;
       }
-      button:hover {
-        background-color: #0056b3;
+
+      .btn:hover {
+        background: #0056b3;
+        transform: translateY(-1px);
       }
-      .response {
-        margin-top: 15px;
-        padding: 10px;
-        border-radius: 4px;
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .btn-success {
+        background: #28a745;
+      }
+
+      .btn-success:hover {
+        background: #1e7e34;
+      }
+
+      .btn-warning {
+        background: #ffc107;
+        color: #212529;
+      }
+
+      .btn-warning:hover {
+        background: #e0a800;
+      }
+
+      .response-container {
+        position: sticky;
+        top: 0;
+      }
+
+      .response-header {
+        background: #343a40;
+        color: white;
+        padding: 15px;
+        margin: -30px -30px 20px -30px;
+      }
+
+      .response-content {
+        background: #212529;
+        color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
         font-family: 'Courier New', monospace;
-        font-size: 12px;
+        font-size: 0.9rem;
         white-space: pre-wrap;
-        max-height: 200px;
+        word-wrap: break-word;
+        max-height: 400px;
         overflow-y: auto;
       }
-      .response.success {
-        background-color: #d4edda;
-        border: 1px solid #c3e6cb;
-        color: #155724;
+
+      .loading {
+        color: #007bff;
+        font-style: italic;
       }
-      .response.error {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
+
+      .error {
+        color: #dc3545;
       }
-      .response.info {
-        background-color: #d1ecf1;
-        border: 1px solid #bee5eb;
-        color: #0c5460;
+
+      .success {
+        color: #28a745;
       }
-      .header {
-        text-align: center;
-        margin-bottom: 30px;
-        grid-column: 1 / -1;
+
+      .protected-route {
+        border-left: 4px solid #ffc107;
+        background: #fffbf0;
       }
-      .config {
-        grid-column: 1 / -1;
-        background: white;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
+
+      .protected-badge {
+        background: #ffc107;
+        color: #212529;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-size: 0.8rem;
+        margin-left: 10px;
       }
-      .config h3 {
-        margin-top: 0;
-        color: #333;
+
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
       }
-      .config-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
+
+      .checkbox-group input[type='checkbox'] {
+        width: auto;
+      }
+
+      .url-display {
+        background: #e9ecef;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        border-left: 4px solid #007bff;
+      }
+
+      @media (max-width: 768px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+
+        .response-section {
+          border-left: none;
+          border-top: 1px solid #dee2e6;
+        }
+
+        .auth-status {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="header">
-      <h1>Users Service Route Tester</h1>
-      <p>Test your users service endpoints both directly and through the gateway</p>
-    </div>
-
-    <div class="config">
-      <h3>Configuration</h3>
-      <div class="config-grid">
-        <div class="form-group">
-          <label for="directUrl">Direct Users Service URL:</label>
-          <input type="text" id="directUrl" value="http://localhost:4001" />
-        </div>
-        <div class="form-group">
-          <label for="gatewayUrl">Gateway URL (with /api/users prefix):</label>
-          <input type="text" id="gatewayUrl" value="http://localhost:4000/api/users" />
-        </div>
-      </div>
-    </div>
-
     <div class="container">
-      <!-- Health Check -->
-      <div class="endpoint-card">
-        <h3>🏥 Health Check</h3>
-        <p><strong>GET</strong> /health</p>
-        <div class="form-group">
-          <label for="healthTarget">Target:</label>
-          <select id="healthTarget">
-            <option value="direct">Direct Service</option>
-            <option value="gateway">Through Gateway</option>
-          </select>
-        </div>
-        <button onclick="testHealth()">Test Health Check</button>
-        <div id="healthResponse" class="response" style="display: none"></div>
+      <div class="header">
+        <h1>🚀 Users Service API Testing</h1>
+        <p>Test all authentication and user management endpoints</p>
       </div>
 
-      <!-- Register -->
-      <div class="endpoint-card">
-        <h3>👤 Register</h3>
-        <p><strong>POST</strong> /auth/register</p>
-        <div class="form-group">
-          <label for="registerTarget">Target:</label>
-          <select id="registerTarget">
-            <option value="direct">Direct Service</option>
-            <option value="gateway">Through Gateway</option>
-          </select>
+      <div class="auth-status">
+        <div class="auth-info">
+          <span id="authStatus" class="status-badge status-unauthenticated">Chưa đăng nhập</span>
+          <span id="userInfo"></span>
         </div>
-        <div class="form-group">
-          <label for="registerEmail">Email:</label>
-          <input
-            type="email"
-            id="registerEmail"
-            placeholder="user@example.com"
-            value="test@example.com"
-          />
-        </div>
-        <div class="form-group">
-          <label for="registerPassword">Password:</label>
-          <input type="password" id="registerPassword" placeholder="password" value="password123" />
-        </div>
-        <div class="form-group">
-          <label for="registerName">Name:</label>
-          <input type="text" id="registerName" placeholder="Full Name" value="Test User" />
-        </div>
-        <button onclick="testRegister()">Register</button>
-        <div id="registerResponse" class="response" style="display: none"></div>
+        <button id="logoutBtn" class="btn-logout" style="display: none" onclick="logout()">
+          Đăng xuất
+        </button>
       </div>
 
-      <!-- Login -->
-      <div class="endpoint-card">
-        <h3>🔐 Login</h3>
-        <p><strong>POST</strong> /auth/login</p>
-        <div class="form-group">
-          <label for="loginTarget">Target:</label>
-          <select id="loginTarget">
-            <option value="direct">Direct Service</option>
-            <option value="gateway">Through Gateway</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="loginEmail">Email:</label>
-          <input
-            type="email"
-            id="loginEmail"
-            placeholder="user@example.com"
-            value="test@example.com"
-          />
-        </div>
-        <div class="form-group">
-          <label for="loginPassword">Password:</label>
-          <input type="password" id="loginPassword" placeholder="password" value="password123" />
-        </div>
-        <button onclick="testLogin()">Login</button>
-        <div id="loginResponse" class="response" style="display: none"></div>
-      </div>
+      <div class="main-content">
+        <div class="routes-section">
+          <!-- General Routes -->
+          <div class="route-group">
+            <h2>🌐 General Routes</h2>
 
-      <!-- Logout -->
-      <div class="endpoint-card">
-        <h3>🚪 Logout</h3>
-        <p><strong>POST</strong> /auth/logout</p>
-        <div class="form-group">
-          <label for="logoutTarget">Target:</label>
-          <select id="logoutTarget">
-            <option value="direct">Direct Service</option>
-            <option value="gateway">Through Gateway</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="authToken">Authorization Token (if needed):</label>
-          <input type="text" id="authToken" placeholder="Bearer token or session cookie" />
-        </div>
-        <button onclick="testLogout()">Logout</button>
-        <div id="logoutResponse" class="response" style="display: none"></div>
-      </div>
+            <div class="route-item">
+              <div class="route-header">
+                <div>
+                  <span class="method method-get">GET</span>
+                  <span class="endpoint">/api/</span>
+                </div>
+              </div>
+              <div class="route-description">Welcome message and service info</div>
+              <div class="url-display">http://localhost:4001/api/</div>
+              <button class="btn" onclick="testWelcome()">Test Welcome</button>
+            </div>
 
-      <!-- Custom Request -->
-      <div class="endpoint-card">
-        <h3>🔧 Custom Request</h3>
-        <p>Test any endpoint with custom parameters</p>
-        <div class="form-group">
-          <label for="customTarget">Target:</label>
-          <select id="customTarget">
-            <option value="direct">Direct Service</option>
-            <option value="gateway">Through Gateway</option>
-          </select>
+            <div class="route-item">
+              <div class="route-header">
+                <div>
+                  <span class="method method-get">GET</span>
+                  <span class="endpoint">/api/health</span>
+                </div>
+              </div>
+              <div class="route-description">Health check endpoint</div>
+              <div class="url-display">http://localhost:4001/api/health</div>
+              <button class="btn btn-success" onclick="testHealth()">Test Health</button>
+            </div>
+
+            <div class="route-item">
+              <div class="route-header">
+                <div>
+                  <span class="method method-get">GET</span>
+                  <span class="endpoint">/api/error</span>
+                </div>
+              </div>
+              <div class="route-description">Test error handling</div>
+              <div class="url-display">http://localhost:4001/api/error</div>
+              <button class="btn btn-warning" onclick="testError()">Test Error</button>
+            </div>
+          </div>
+
+          <!-- Authentication Routes -->
+          <div class="route-group">
+            <h2>🔐 Authentication Routes</h2>
+
+            <div class="route-item">
+              <div class="route-header">
+                <div>
+                  <span class="method method-post">POST</span>
+                  <span class="endpoint">/api/auth/register</span>
+                </div>
+              </div>
+              <div class="route-description">Đăng ký tài khoản mới</div>
+              <div class="url-display">http://localhost:4001/api/auth/register</div>
+              <form id="registerForm">
+                <div class="form-group">
+                  <label>Email:</label>
+                  <input type="email" name="email" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label>Password:</label>
+                  <input type="password" name="password" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label>Confirm Password:</label>
+                  <input type="password" name="confirmPassword" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label>Username (optional):</label>
+                  <input type="text" name="username" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label>First Name (optional):</label>
+                  <input type="text" name="firstName" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label>Last Name (optional):</label>
+                  <input type="text" name="lastName" class="form-control" />
+                </div>
+                <button type="submit" class="btn">Đăng ký</button>
+              </form>
+            </div>
+
+            <div class="route-item">
+              <div class="route-header">
+                <div>
+                  <span class="method method-post">POST</span>
+                  <span class="endpoint">/api/auth/login</span>
+                </div>
+              </div>
+              <div class="route-description">Đăng nhập</div>
+              <div class="url-display">http://localhost:4001/api/auth/login</div>
+              <form id="loginForm">
+                <div class="form-group">
+                  <label>Email:</label>
+                  <input type="email" name="email" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label>Password:</label>
+                  <input type="password" name="password" class="form-control" required />
+                </div>
+                <button type="submit" class="btn">Đăng nhập</button>
+              </form>
+            </div>
+
+            <div class="route-item">
+              <div class="route-header">
+                <div>
+                  <span class="method method-post">POST</span>
+                  <span class="endpoint">/api/auth/logout</span>
+                </div>
+              </div>
+              <div class="route-description">Đăng xuất (xóa token phía client)</div>
+              <div class="url-display">http://localhost:4001/api/auth/logout</div>
+              <button class="btn" onclick="testLogout()">Test Logout</button>
+            </div>
+
+            <div class="route-item">
+              <div class="route-header">
+                <div>
+                  <span class="method method-get">GET</span>
+                  <span class="endpoint">/api/auth/check-email/:email</span>
+                </div>
+              </div>
+              <div class="route-description">Kiểm tra email có sẵn không</div>
+              <div class="url-display">http://localhost:4001/api/auth/check-email/{email}</div>
+              <form id="checkEmailForm">
+                <div class="form-group">
+                  <label>Email to check:</label>
+                  <input type="email" name="email" class="form-control" required />
+                </div>
+                <button type="submit" class="btn">Check Email</button>
+              </form>
+            </div>
+
+            <div class="route-item">
+              <div class="route-header">
+                <div>
+                  <span class="method method-post">POST</span>
+                  <span class="endpoint">/api/auth/refresh</span>
+                </div>
+              </div>
+              <div class="route-description">Làm mới access token</div>
+              <div class="url-display">http://localhost:4001/api/auth/refresh</div>
+              <button class="btn" onclick="testRefreshToken()">Test Refresh Token</button>
+            </div>
+
+            <div class="route-item">
+              <div class="route-header">
+                <div>
+                  <span class="method method-post">POST</span>
+                  <span class="endpoint">/api/auth/verify</span>
+                </div>
+              </div>
+              <div class="route-description">Xác thực token</div>
+              <div class="url-display">http://localhost:4001/api/auth/verify</div>
+              <button class="btn" onclick="testVerifyToken()">Test Verify Token</button>
+            </div>
+
+            <div class="route-item">
+              <div class="route-header">
+                <div>
+                  <span class="method method-post">POST</span>
+                  <span class="endpoint">/api/auth/forgot-password</span>
+                </div>
+              </div>
+              <div class="route-description">Yêu cầu đặt lại mật khẩu</div>
+              <div class="url-display">http://localhost:4001/api/auth/forgot-password</div>
+              <form id="forgotPasswordForm">
+                <div class="form-group">
+                  <label>Email:</label>
+                  <input type="email" name="email" class="form-control" required />
+                </div>
+                <button type="submit" class="btn">Request Password Reset</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Protected Routes -->
+          <div class="route-group">
+            <h2>🔒 Protected Routes</h2>
+
+            <div class="route-item protected-route">
+              <div class="route-header">
+                <div>
+                  <span class="method method-get">GET</span>
+                  <span class="endpoint">/api/auth/profile</span>
+                  <span class="protected-badge">PROTECTED</span>
+                </div>
+              </div>
+              <div class="route-description">Lấy thông tin profile người dùng hiện tại</div>
+              <div class="url-display">http://localhost:4001/api/auth/profile</div>
+              <button class="btn" onclick="testGetProfile()">Get Profile</button>
+            </div>
+
+            <div class="route-item protected-route">
+              <div class="route-header">
+                <div>
+                  <span class="method method-put">PUT</span>
+                  <span class="endpoint">/api/auth/profile</span>
+                  <span class="protected-badge">PROTECTED</span>
+                </div>
+              </div>
+              <div class="route-description">Cập nhật thông tin profile</div>
+              <div class="url-display">http://localhost:4001/api/auth/profile</div>
+              <form id="updateProfileForm">
+                <div class="form-group">
+                  <label>Username:</label>
+                  <input type="text" name="username" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label>First Name:</label>
+                  <input type="text" name="firstName" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label>Last Name:</label>
+                  <input type="text" name="lastName" class="form-control" />
+                </div>
+                <button type="submit" class="btn">Update Profile</button>
+              </form>
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="customMethod">Method:</label>
-          <select id="customMethod">
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-            <option value="DELETE">DELETE</option>
-          </select>
+
+        <div class="response-section">
+          <div class="response-container">
+            <div class="response-header">
+              <h3>📡 API Response</h3>
+            </div>
+            <div id="responseContent" class="response-content">
+              Chưa có phản hồi nào. Hãy test một endpoint để xem kết quả.
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="customPath">Path (e.g., /health, /auth/login):</label>
-          <input type="text" id="customPath" placeholder="/health" value="/health" />
-        </div>
-        <div class="form-group">
-          <label for="customHeaders">Headers (JSON):</label>
-          <textarea id="customHeaders" rows="3" placeholder='{"Content-Type": "application/json"}'>
-{}</textarea
-          >
-        </div>
-        <div class="form-group">
-          <label for="customBody">Request Body (JSON):</label>
-          <textarea id="customBody" rows="4" placeholder='{"key": "value"}'></textarea>
-        </div>
-        <button onclick="testCustom()">Send Request</button>
-        <div id="customResponse" class="response" style="display: none"></div>
       </div>
     </div>
 
     <script>
-      function getBaseUrl(target) {
-        if (target === 'direct') {
-          return document.getElementById('directUrl').value;
+      const BASE_URL = 'http://localhost:4001/api';
+      let currentUser = null;
+      let accessToken = localStorage.getItem('accessToken');
+      let refreshToken = localStorage.getItem('refreshToken');
+
+      // Initialize page
+      document.addEventListener('DOMContentLoaded', function () {
+        updateAuthStatus();
+        setupFormHandlers();
+
+        // Try to verify existing token on page load
+        if (accessToken) {
+          testVerifyToken();
+        }
+      });
+
+      function updateAuthStatus() {
+        const authStatus = document.getElementById('authStatus');
+        const userInfo = document.getElementById('userInfo');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        if (accessToken && currentUser) {
+          authStatus.className = 'status-badge status-authenticated';
+          authStatus.textContent = 'Đã đăng nhập';
+          userInfo.textContent = `${currentUser.email}${currentUser.username ? ' (@' + currentUser.username + ')' : ''}`;
+          logoutBtn.style.display = 'block';
         } else {
-          return document.getElementById('gatewayUrl').value;
+          authStatus.className = 'status-badge status-unauthenticated';
+          authStatus.textContent = 'Chưa đăng nhập';
+          userInfo.textContent = '';
+          logoutBtn.style.display = 'none';
         }
       }
 
-      function showResponse(elementId, response, status, isSuccess) {
-        const element = document.getElementById(elementId);
-        element.style.display = 'block';
-        element.className = `response ${isSuccess ? 'success' : 'error'}`;
-        element.textContent = `Status: ${status}\n\n${response}`;
+      function displayResponse(response, isError = false) {
+        const responseContent = document.getElementById('responseContent');
+        const timestamp = new Date().toLocaleTimeString();
+
+        let statusClass = isError ? 'error' : 'success';
+        let statusText = isError ? 'ERROR' : 'SUCCESS';
+
+        responseContent.innerHTML = `<span class="${statusClass}">[${timestamp}] ${statusText}</span>\n\n${JSON.stringify(response, null, 2)}`;
       }
 
-      function showInfo(elementId, message) {
-        const element = document.getElementById(elementId);
-        element.style.display = 'block';
-        element.className = 'response info';
-        element.textContent = message;
+      function displayLoading(message = 'Đang gửi request...') {
+        const responseContent = document.getElementById('responseContent');
+        responseContent.innerHTML = `<span class="loading">${message}</span>`;
       }
 
       async function makeRequest(url, options = {}) {
         try {
-          showInfo(options.responseElementId, `Making request to: ${url}`);
+          displayLoading();
 
-          const response = await fetch(url, {
-            mode: 'cors',
-            ...options,
-          });
+          const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers,
+          };
 
-          const responseText = await response.text();
-          let parsedResponse;
-
-          try {
-            parsedResponse = JSON.parse(responseText);
-            parsedResponse = JSON.stringify(parsedResponse, null, 2);
-          } catch (e) {
-            parsedResponse = responseText;
+          if (accessToken && options.needAuth !== false) {
+            headers['Authorization'] = `Bearer ${accessToken}`;
           }
 
-          showResponse(options.responseElementId, parsedResponse, response.status, response.ok);
+          const response = await fetch(url, {
+            ...options,
+            headers,
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            displayResponse(data);
+            return data;
+          } else {
+            displayResponse(data, true);
+            throw new Error(data.message || 'Request failed');
+          }
         } catch (error) {
-          showResponse(
-            options.responseElementId,
-            `Error: ${error.message}`,
-            'Network Error',
-            false
+          displayResponse(
+            {
+              error: error.message,
+              timestamp: new Date().toISOString(),
+            },
+            true
           );
+          throw error;
+        }
+      }
+
+      function setupFormHandlers() {
+        // Register form
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const formData = new FormData(this);
+          const data = Object.fromEntries(formData);
+
+          try {
+            const response = await makeRequest(`${BASE_URL}/auth/register`, {
+              method: 'POST',
+              body: JSON.stringify(data),
+              needAuth: false,
+            });
+
+            if (response.accessToken) {
+              accessToken = response.accessToken;
+              refreshToken = response.refreshToken;
+              currentUser = response.user;
+              localStorage.setItem('accessToken', accessToken);
+              localStorage.setItem('refreshToken', refreshToken);
+              updateAuthStatus();
+            }
+          } catch (error) {
+            console.error('Registration failed:', error);
+          }
+        });
+
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const formData = new FormData(this);
+          const data = Object.fromEntries(formData);
+
+          try {
+            const response = await makeRequest(`${BASE_URL}/auth/login`, {
+              method: 'POST',
+              body: JSON.stringify(data),
+              needAuth: false,
+            });
+
+            if (response.accessToken) {
+              accessToken = response.accessToken;
+              refreshToken = response.refreshToken;
+              currentUser = response.user;
+              localStorage.setItem('accessToken', accessToken);
+              localStorage.setItem('refreshToken', refreshToken);
+              updateAuthStatus();
+            }
+          } catch (error) {
+            console.error('Login failed:', error);
+          }
+        });
+
+        // Check email form
+        document.getElementById('checkEmailForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const formData = new FormData(this);
+          const email = formData.get('email');
+
+          try {
+            await makeRequest(`${BASE_URL}/auth/check-email/${encodeURIComponent(email)}`, {
+              method: 'GET',
+              needAuth: false,
+            });
+          } catch (error) {
+            console.error('Check email failed:', error);
+          }
+        });
+
+        // Update profile form
+        document.getElementById('updateProfileForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const formData = new FormData(this);
+          const data = {};
+
+          // Only include non-empty fields
+          for (let [key, value] of formData.entries()) {
+            if (value.trim()) {
+              data[key] = value;
+            }
+          }
+
+          try {
+            const response = await makeRequest(`${BASE_URL}/auth/profile`, {
+              method: 'PUT',
+              body: JSON.stringify(data),
+            });
+
+            if (response.data) {
+              currentUser = response.data;
+              updateAuthStatus();
+            }
+          } catch (error) {
+            console.error('Update profile failed:', error);
+          }
+        });
+
+        // Forgot password form
+        document
+          .getElementById('forgotPasswordForm')
+          .addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            try {
+              await makeRequest(`${BASE_URL}/auth/forgot-password`, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                needAuth: false,
+              });
+            } catch (error) {
+              console.error('Forgot password failed:', error);
+            }
+          });
+      }
+
+      // General route tests
+      async function testWelcome() {
+        try {
+          await makeRequest(`${BASE_URL}/`, {
+            method: 'GET',
+            needAuth: false,
+          });
+        } catch (error) {
+          console.error('Welcome test failed:', error);
         }
       }
 
       async function testHealth() {
-        const target = document.getElementById('healthTarget').value;
-        const baseUrl = getBaseUrl(target);
-        const url = `${baseUrl}/health`;
-
-        await makeRequest(url, {
-          method: 'GET',
-          responseElementId: 'healthResponse',
-        });
+        try {
+          await makeRequest(`${BASE_URL}/health`, {
+            method: 'GET',
+            needAuth: false,
+          });
+        } catch (error) {
+          console.error('Health test failed:', error);
+        }
       }
 
-      async function testRegister() {
-        const target = document.getElementById('registerTarget').value;
-        const baseUrl = getBaseUrl(target);
-        const url = `${baseUrl}/auth/register`;
-
-        const body = {
-          email: document.getElementById('registerEmail').value,
-          password: document.getElementById('registerPassword').value,
-          name: document.getElementById('registerName').value,
-        };
-
-        await makeRequest(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-          responseElementId: 'registerResponse',
-        });
+      async function testError() {
+        try {
+          await makeRequest(`${BASE_URL}/error`, {
+            method: 'GET',
+            needAuth: false,
+          });
+        } catch (error) {
+          console.error('Error test failed:', error);
+        }
       }
 
-      async function testLogin() {
-        const target = document.getElementById('loginTarget').value;
-        const baseUrl = getBaseUrl(target);
-        const url = `${baseUrl}/auth/login`;
-
-        const body = {
-          email: document.getElementById('loginEmail').value,
-          password: document.getElementById('loginPassword').value,
-        };
-
-        await makeRequest(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-          responseElementId: 'loginResponse',
-        });
-      }
-
+      // Auth route tests
       async function testLogout() {
-        const target = document.getElementById('logoutTarget').value;
-        const baseUrl = getBaseUrl(target);
-        const url = `${baseUrl}/auth/logout`;
+        try {
+          await makeRequest(`${BASE_URL}/auth/logout`, {
+            method: 'POST',
+          });
+        } catch (error) {
+          console.error('Logout test failed:', error);
+        }
+      }
 
-        const headers = {
-          'Content-Type': 'application/json',
-        };
-
-        const token = document.getElementById('authToken').value;
-        if (token) {
-          headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      async function testRefreshToken() {
+        if (!refreshToken) {
+          displayResponse(
+            {
+              error: 'Không có refresh token. Vui lòng đăng nhập trước.',
+              timestamp: new Date().toISOString(),
+            },
+            true
+          );
+          return;
         }
 
-        await makeRequest(url, {
-          method: 'POST',
-          headers: headers,
-          body: JSON.stringify({}),
-          responseElementId: 'logoutResponse',
+        try {
+          const response = await makeRequest(`${BASE_URL}/auth/refresh`, {
+            method: 'POST',
+            body: JSON.stringify({ refreshToken }),
+            needAuth: false,
+          });
+
+          if (response.accessToken) {
+            accessToken = response.accessToken;
+            refreshToken = response.refreshToken;
+            currentUser = response.user;
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
+            updateAuthStatus();
+          }
+        } catch (error) {
+          console.error('Refresh token failed:', error);
+        }
+      }
+
+      async function testVerifyToken() {
+        if (!accessToken) {
+          displayResponse(
+            {
+              error: 'Không có access token. Vui lòng đăng nhập trước.',
+              timestamp: new Date().toISOString(),
+            },
+            true
+          );
+          return;
+        }
+
+        try {
+          const response = await makeRequest(`${BASE_URL}/auth/verify`, {
+            method: 'POST',
+            body: JSON.stringify({ token: accessToken }),
+            needAuth: false,
+          });
+
+          if (response.user) {
+            currentUser = response.user;
+            updateAuthStatus();
+          }
+        } catch (error) {
+          console.error('Verify token failed:', error);
+          // Token might be invalid, clear it
+          logout();
+        }
+      }
+
+      async function testGetProfile() {
+        try {
+          const response = await makeRequest(`${BASE_URL}/auth/profile`, {
+            method: 'GET',
+          });
+
+          if (response.data) {
+            currentUser = response.data;
+            updateAuthStatus();
+          }
+        } catch (error) {
+          console.error('Get profile failed:', error);
+        }
+      }
+
+      function logout() {
+        accessToken = null;
+        refreshToken = null;
+        currentUser = null;
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        updateAuthStatus();
+
+        displayResponse({
+          message: 'Đã đăng xuất thành công!',
+          timestamp: new Date().toISOString(),
         });
       }
-
-      async function testCustom() {
-        const target = document.getElementById('customTarget').value;
-        const baseUrl = getBaseUrl(target);
-        const path = document.getElementById('customPath').value;
-        const url = `${baseUrl}${path}`;
-
-        const method = document.getElementById('customMethod').value;
-        const headersText = document.getElementById('customHeaders').value.trim();
-        const bodyText = document.getElementById('customBody').value.trim();
-
-        let headers = {};
-        if (headersText) {
-          try {
-            headers = JSON.parse(headersText);
-          } catch (e) {
-            showResponse(
-              'customResponse',
-              `Invalid headers JSON: ${e.message}`,
-              'Parse Error',
-              false
-            );
-            return;
-          }
-        }
-
-        const options = {
-          method: method,
-          headers: headers,
-          responseElementId: 'customResponse',
-        };
-
-        if (bodyText && (method === 'POST' || method === 'PUT')) {
-          try {
-            JSON.parse(bodyText); // Validate JSON
-            options.body = bodyText;
-          } catch (e) {
-            showResponse('customResponse', `Invalid body JSON: ${e.message}`, 'Parse Error', false);
-            return;
-          }
-        }
-
-        await makeRequest(url, options);
-      }
-
-      // Auto-fill custom headers with JSON content-type for POST/PUT
-      document.getElementById('customMethod').addEventListener('change', function () {
-        const method = this.value;
-        const headersField = document.getElementById('customHeaders');
-
-        if ((method === 'POST' || method === 'PUT') && headersField.value.trim() === '{}') {
-          headersField.value = '{"Content-Type": "application/json"}';
-        }
-      });
     </script>
   </body>
 </html>
