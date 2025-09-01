@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 import { success, error } from '../utils/response';
 import authRoutes from './auth.routes';
+import userRoutes from './user.routes';
 import testRoutes from './test.routes';
 import { getDbConnectionStatus } from '../config/database';
 import { isDevelopment } from '../config/environment';
@@ -8,6 +9,7 @@ import { isDevelopment } from '../config/environment';
 const router: express.Router = Router();
 
 router.use('/auth', authRoutes);
+router.use('/user', userRoutes);
 
 if (isDevelopment) {
   router.use('/test', testRoutes);

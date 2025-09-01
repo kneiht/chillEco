@@ -167,6 +167,42 @@ export async function deactivateUser(userId: string): Promise<User | null> {
   }
 }
 
+// Change user password
+export async function changeUserPassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<boolean> {
+  try {
+    // Find user with password hash
+    const userDoc = await UserModel.findById(userId).select('+passwordHash');
+
+    if (!userDoc) {
+      throw new Error('User not found');
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await userDoc.comparePassword(currentPassword);
+
+    if (!isCurrentPasswordValid) {
+      return false;
+    }
+
+    // Hash new password
+    const newPasswordHash = await hashPassword(newPassword);
+
+    // Update password
+    await UserModel.findByIdAndUpdate(userId, {
+      passwordHash: newPasswordHash,
+      updatedAt: new Date(),
+    });
+
+    return true;
+  } catch (_error) {
+    throw new Error('Failed to change password');
+  }
+}
+
 // Get user statistics
 export async function getUserStats() {
   try {
@@ -179,8 +215,33 @@ export async function getUserStats() {
       active: activeUsers,
       verified: verifiedUsers,
       inactive: totalUsers - activeUsers,
+      registeredToday: await UserModel.countDocuments({
+        createdAt: {
+          $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+        },
+      }),
+      registeredThisWeek: await UserModel.countDocuments({
+        createdAt: {
+          $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+        },
+      }),
     };
   } catch (_error) {
     throw new Error('Failed to get user statistics');
+  }
+}
+
+// Get user activity (placeholder)
+export async function getUserActivity(userId: string) {
+  try {
+    // TODO: Implement activity tracking
+    return {
+      userId,
+      activities: [],
+      lastLogin: null,
+      totalLogins: 0,
+    };
+  } catch (_error) {
+    throw new Error('Failed to get user activity');
   }
 }
